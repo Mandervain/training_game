@@ -127,6 +127,16 @@ class Game:
                         self.state = 'SHOW_HIGHSCORES'
                     elif event.key == pygame.K_BACKSPACE:
                         self.name_buffer = self.name_buffer[:-1]
+                    elif event.key == pygame.K_ESCAPE:
+                        # Cancel name entry and restart current level
+                        self.name_buffer = ""
+                        self.start_level(self.current_level_index)
+                        self.state = 'RUN'
+                    elif event.key == pygame.K_r:
+                        # Restart without saving
+                        self.name_buffer = ""
+                        self.start_level(self.current_level_index)
+                        self.state = 'RUN'
                     else:
                         # Only accept printable characters
                         ch = event.unicode
@@ -136,7 +146,11 @@ class Game:
                     if event.key == pygame.K_p:
                         self.state = 'PAUSE' if self.state == 'RUN' else 'RUN'
                     elif event.key == pygame.K_r:
+                        # Restart current level
                         self.start_level(self.current_level_index)
+                    elif event.key == pygame.K_h:
+                        # Show Hall of Fame anytime with H
+                        self.state = 'SHOW_HIGHSCORES'
 
         keys = pygame.key.get_pressed()
         if self.state == 'RUN':
