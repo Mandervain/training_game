@@ -18,6 +18,7 @@ from training_game.enemy import Enemy
 from training_game.level import load_level
 from training_game.utils import render_text
 from training_game import logger
+from training_game.hall_of_fame import add_entry, get_top
 
 
 class Game:
@@ -38,8 +39,9 @@ class Game:
         self.enemies = []
 
         self.score = 0
-
         self.start_level(self.current_level_index)
+        # Name entry state for Hall of Fame
+        self.name_buffer = ""
 
     def start_level(self, index: int) -> None:
         walls, enemy_count, enemy_speed = load_level(index)
@@ -114,10 +116,27 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    self.state = 'PAUSE' if self.state == 'RUN' else 'RUN'
-                elif event.key == pygame.K_r:
-                    self.start_level(self.current_level_index)
+                # If entering name after game over, capture text keys first
+                if self.state == 'ENTER_NAME':
+                    if event.key == pygame.K_RETURN:
+                        name = self.name_buffer.strip() or 'Player'
+                        add_entry(name, self.player.score)
+                        logger.info('Saved high score for %s: %s', name, self.player.score)
+                        self.name_buffer = ""
+                        # After saving, show high scores screen briefly
+                        self.state = 'SHOW_HIGHSCORES'
+                    elif event.key == pygame.K_BACKSPACE:
+                        self.name_buffer = self.name_buffer[:-1]
+                    else:
+                        # Only accept printable characters
+                        ch = event.unicode
+                        if ch and len(self.name_buffer) < 20 and ch.isprintable():
+                            self.name_buffer += ch
+                else:
+                    if event.key == pygame.K_p:
+                        self.state = 'PAUSE' if self.state == 'RUN' else 'RUN'
+                    elif event.key == pygame.K_r:
+                        self.start_level(self.current_level_index)
 
         keys = pygame.key.get_pressed()
         if self.state == 'RUN':
@@ -127,6 +146,11 @@ class Game:
         elif self.state == 'VICTORY':
             if keys[pygame.K_n] or keys[pygame.K_RETURN]:
                 self._advance_level()
+        elif self.state == 'SHOW_HIGHSCORES':
+            # Any key returns to main menu / restart current level
+            if any(keys):
+                self.start_level(0)
+                self.state = 'RUN'
 
     def update(self) -> None:
         if self.state == 'RUN':
@@ -155,7 +179,8 @@ class Game:
                         break
 
             if self.player.lives <= 0:
-                self.state = 'GAME_OVER'
+                # Prompt for name and add to hall of fame
+                self.state = 'ENTER_NAME'
 
             if not self.enemies:
                 self.state = 'VICTORY'
@@ -165,6 +190,9 @@ class Game:
             self.level_transition_timer += 1.0 / FPS
             if self.level_transition_timer >= LEVEL_TRANSITION_TIME:
                 self._advance_level()
+        elif self.state == 'SHOW_HIGHSCORES':
+            # nothing to update, just display
+            pass
 
     def render(self) -> None:
         self.screen.fill(COLOR_BLACK)
@@ -180,6 +208,17 @@ class Game:
 
         if self.state == 'GAME_OVER':
             render_text(self.screen, 'GAME OVER', (SCREEN_WIDTH // 2 - 80, SCREEN_HEIGHT // 2), font_size=48, color=(255, 0, 0))
+        elif self.state == 'ENTER_NAME':
+            render_text(self.screen, 'GAME OVER', (SCREEN_WIDTH // 2 - 80, SCREEN_HEIGHT // 2 - 60), font_size=48, color=(255, 0, 0))
+            render_text(self.screen, 'Enter your name and press Enter:', (SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2), font_size=24)
+            render_text(self.screen, self.name_buffer or '_', (SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 + 40), font_size=28)
+        elif self.state == 'SHOW_HIGHSCORES':
+            render_text(self.screen, 'Hall of Fame - Top Scores', (SCREEN_WIDTH // 2 - 200, 40), font_size=36, color=(255, 215, 0))
+            top = get_top(10)
+            y = 100
+            for i, e in enumerate(top, start=1):
+                render_text(self.screen, f"{i}. {e.name} - {e.score}", (SCREEN_WIDTH // 2 - 160, y), font_size=24)
+                y += 30
         elif self.state == 'VICTORY':
             render_text(self.screen, f"Victory! Stage {self.current_level_index + 1} Complete", (SCREEN_WIDTH // 2 - 160, SCREEN_HEIGHT // 2), font_size=36, color=(0, 255, 0))
             render_text(self.screen, 'Press N or Enter to continue', (SCREEN_WIDTH // 2 - 160, SCREEN_HEIGHT // 2 + 50), font_size=24)

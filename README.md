@@ -88,6 +88,7 @@ The project is modular, with separate files for each game component (e.g., playe
 - **Bullet Collisions**: Bullets disappear upon hitting walls or enemies.
 - **Game States**: The game supports running, pausing, and restarting.
 - **Enemy Shooting (In Progress)**: Added `EnemyBullet` class to handle enemy bullets.
+ - **Hall of Fame**: High scores are saved to `training_game/hall_of_fame.json` and displayed after game over.
 
 ### Next Steps
 - Integrate enemy shooting logic into the `Enemy` class.
