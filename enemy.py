@@ -4,8 +4,8 @@ enemy.py: Defines the Enemy class with simple random movement and anti-stuck log
 
 import pygame
 import random
-from settings import ENEMY_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, RANDOM_SEED
-from enemy_bullet import EnemyBullet
+from training_game.settings import ENEMY_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, RANDOM_SEED
+from training_game.enemy_bullet import EnemyBullet
 
 random.seed(RANDOM_SEED)
 

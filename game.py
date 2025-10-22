@@ -3,11 +3,11 @@ game.py: Defines the Game class for managing the game loop, states, and renderin
 """
 
 import pygame
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, COLOR_BLACK
-from player import Player
-from enemy import Enemy
-from level import build_map
-from utils import render_text
+from training_game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, COLOR_BLACK
+from training_game.player import Player
+from training_game.enemy import Enemy
+from training_game.level import build_map
+from training_game.utils import render_text
 
 class Game:
     """
@@ -25,9 +25,46 @@ class Game:
         self.state = "RUN"
 
         # Game objects
-        self.player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100)
-        self.enemies = [Enemy(100 + i * 60, 100) for i in range(5)]
+        # Build map first so we can choose a spawn location that isn't
+        # inside a wall.
         self.walls = build_map()
+
+        # Find a spawn position near bottom center that doesn't collide
+        # with any wall. Start at preferred location and try shifting up
+        # and sideways until a free spot is found.
+        preferred_x = SCREEN_WIDTH // 2
+        preferred_y = SCREEN_HEIGHT - 100
+        player_w, player_h = 40, 40
+
+        def collides_with_walls(x, y):
+            r = pygame.Rect(x, y, player_w, player_h)
+            return any(r.colliderect(w.rect) for w in self.walls)
+
+        spawn_x, spawn_y = preferred_x, preferred_y
+        if collides_with_walls(spawn_x, spawn_y):
+            # try a small spiral search: move up in steps of TILE_SIZE,
+            # then sweep left/right
+            step = 40
+            found = False
+            for dy in range(0, SCREEN_HEIGHT, step):
+                for dx in range(0, SCREEN_WIDTH, step):
+                    for sx, sy in ((0, -dy), (dx, -dy), (-dx, -dy)):
+                        x = preferred_x + sx
+                        y = preferred_y + sy
+                        # clamp
+                        x = max(0, min(SCREEN_WIDTH - player_w, x))
+                        y = max(0, min(SCREEN_HEIGHT - player_h, y))
+                        if not collides_with_walls(x, y):
+                            spawn_x, spawn_y = x, y
+                            found = True
+                            break
+                    if found:
+                        break
+                if found:
+                    break
+
+        self.player = Player(spawn_x, spawn_y)
+        self.enemies = [Enemy(100 + i * 60, 100) for i in range(5)]
 
     def handle_events(self):
         """
@@ -58,15 +95,17 @@ class Game:
                 enemy.update(self.walls)
 
             # Check bullet collisions with enemies
-            for bullet in self.player.bullets[:]:
-                if bullet not in self.player.bullets:
-                    continue  # Skip if the bullet was already removed
-                for enemy in self.enemies[:]:
+            # Check bullet collisions with enemies (iterate over a copy so we
+            # can safely remove bullets/enemies during iteration)
+            for bullet in list(self.player.bullets):
+                for enemy in list(self.enemies):
                     if bullet.rect.colliderect(enemy.rect):
+                        # Remove bullet and enemy if still present
                         if bullet in self.player.bullets:
                             self.player.bullets.remove(bullet)
-                        self.enemies.remove(enemy)
-                        self.player.score += 100
+                        if enemy in self.enemies:
+                            self.enemies.remove(enemy)
+                            self.player.score += 100
                         break
 
             # Update enemy bullets

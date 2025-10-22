@@ -3,7 +3,7 @@ enemy_bullet.py: Defines the EnemyBullet class for handling enemy bullet movemen
 """
 
 import pygame
-from settings import BULLET_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT
+from training_game.settings import BULLET_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT
 
 class EnemyBullet:
     """

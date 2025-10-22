@@ -3,7 +3,7 @@ bullet.py: Defines the Bullet class for handling movement and collisions.
 """
 
 import pygame
-from settings import BULLET_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT
+from training_game.settings import BULLET_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Bullet:
     """

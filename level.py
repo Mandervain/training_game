@@ -3,8 +3,8 @@ level.py: Defines the map layout and generates walls.
 """
 
 import pygame
-from wall import Wall
-from settings import TILE_SIZE
+from training_game.wall import Wall
+from training_game.settings import TILE_SIZE
 
 def build_map():
     """

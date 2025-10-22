@@ -4,6 +4,10 @@ utils.py: Contains utility functions for the game.
 
 import pygame
 
+# Simple cache for pygame.Font objects keyed by size to avoid creating a
+# new Font instance every frame (expensive).
+_FONT_CACHE = {}
+
 def clamp(value, min_value, max_value):
     """
     Clamp a value between a minimum and maximum.
@@ -23,6 +27,11 @@ def render_text(surface, text, position, font_size=24, color=(255, 255, 255)):
     :param font_size: Font size of the text.
     :param color: Color of the text.
     """
-    font = pygame.font.Font(None, font_size)
+    # Reuse font instances where possible to improve performance
+    font = _FONT_CACHE.get(font_size)
+    if font is None:
+        font = pygame.font.Font(None, font_size)
+        _FONT_CACHE[font_size] = font
+
     text_surface = font.render(text, True, color)
     surface.blit(text_surface, position)

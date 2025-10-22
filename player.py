@@ -3,8 +3,8 @@ player.py: Defines the Player class for movement, shooting, and collision handli
 """
 
 import pygame
-from settings import PLAYER_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_LIVES
-from bullet import Bullet
+from training_game.settings import PLAYER_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_LIVES
+from training_game.bullet import Bullet
 
 class Player:
     """
@@ -21,6 +21,8 @@ class Player:
         self.score = 0
         self.bullets = []
         self.shoot_cooldown = 0
+        # Facing: one of (0,-1), (0,1), (1,0), (-1,0). Default faces up.
+        self.facing = (0, -1)
 
     def handle_input(self, keys, walls):
         """
@@ -31,12 +33,16 @@ class Player:
         dx, dy = 0, 0
         if keys[pygame.K_w] or keys[pygame.K_UP]:
             dy = -PLAYER_SPEED
+            self.facing = (0, -1)
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             dy = PLAYER_SPEED
+            self.facing = (0, 1)
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             dx = -PLAYER_SPEED
+            self.facing = (-1, 0)
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             dx = PLAYER_SPEED
+            self.facing = (1, 0)
 
         if dx != 0 or dy != 0:
             print(f"Player trying to move: dx={dx}, dy={dy}, walls count={len(walls)}")
@@ -61,7 +67,13 @@ class Player:
         Shoot a bullet if not on cooldown.
         """
         if self.shoot_cooldown == 0:
-            bullet = Bullet(self.rect.centerx, self.rect.top, (0, -1))  # Shoot upwards
+            # Fire in the current facing direction. Spawn the bullet
+            # slightly outside the player's rect so it doesn't immediately
+            # collide with the player.
+            fx, fy = self.facing
+            spawn_x = self.rect.centerx + fx * (self.rect.width // 2 + 2)
+            spawn_y = self.rect.centery + fy * (self.rect.height // 2 + 2)
+            bullet = Bullet(spawn_x, spawn_y, self.facing)
             self.bullets.append(bullet)
             print(f"Player fired a bullet at {self.rect.topleft}. Total bullets: {len(self.bullets)}")
             self.shoot_cooldown = 20  # Cooldown in frames
