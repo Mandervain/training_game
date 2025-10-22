@@ -14,3 +14,8 @@ __all__ = [
     'utils',
     'settings',
 ]
+
+import logging
+
+# Package-level logger
+logger = logging.getLogger('training_game')

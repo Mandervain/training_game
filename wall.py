@@ -3,6 +3,7 @@ wall.py: Defines the Wall class for static, indestructible blocks.
 """
 
 import pygame
+from training_game import logger
 
 class Wall:
     """
@@ -26,9 +27,9 @@ class Wall:
         """
         if self.destructible:
             self.health -= 1
-            print(f"Wall at {self.rect.topleft} took damage. Remaining health: {self.health}")
+            logger.debug("Wall at %s took damage. Remaining health: %s", self.rect.topleft, self.health)
             if self.health <= 0:
-                print(f"Wall at {self.rect.topleft} destroyed.")
+                logger.info("Wall at %s destroyed.", self.rect.topleft)
                 return True
         return False
 

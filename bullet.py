@@ -4,6 +4,7 @@ bullet.py: Defines the Bullet class for handling movement and collisions.
 
 import pygame
 from training_game.settings import BULLET_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT
+from training_game import logger
 
 class Bullet:
     """
@@ -32,12 +33,12 @@ class Bullet:
         for wall in walls:
             if self.rect.colliderect(wall.rect):
                 if wall.destructible:
-                    print(f"Bullet hit destructible wall at {wall.rect.topleft}. Wall health: {wall.health}")
+                    logger.debug("Bullet hit destructible wall at %s. Wall health: %s", wall.rect.topleft, wall.health)
                     if wall.take_damage():
-                        print(f"Wall at {wall.rect.topleft} destroyed.")
+                        logger.info("Wall at %s destroyed.", wall.rect.topleft)
                         return (True, wall)  # Indicate bullet and wall should be removed
                 else:
-                    print(f"Bullet hit indestructible wall at {wall.rect.topleft}.")
+                    logger.debug("Bullet hit indestructible wall at %s.", wall.rect.topleft)
                 return (True, None)  # Indicate that the bullet should be removed
         return (False, None)
 

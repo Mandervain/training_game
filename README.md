@@ -97,3 +97,9 @@ The project is modular, with separate files for each game component (e.g., playe
 
 ### Future Development
 Refer to `# TODO(Faza 2)` comments in the code for areas to expand functionality.
+
+## Level system
+- Gra zawiera 3 levele.
+- Po zniszczeniu wszystkich wrogów automatycznie przechodzisz dalej.
+- Każdy level ma inny układ przeszkód i rosnącą trudność.
+- Po ukończeniu ostatniego levelu pojawia się ekran „Campaign Complete”.

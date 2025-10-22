@@ -5,6 +5,7 @@ player.py: Defines the Player class for movement, shooting, and collision handli
 import pygame
 from training_game.settings import PLAYER_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_LIVES
 from training_game.bullet import Bullet
+from training_game import logger
 
 class Player:
     """
@@ -45,7 +46,7 @@ class Player:
             self.facing = (1, 0)
 
         if dx != 0 or dy != 0:
-            print(f"Player trying to move: dx={dx}, dy={dy}, walls count={len(walls)}")
+            logger.debug("Player trying to move: dx=%s, dy=%s, walls count=%s", dx, dy, len(walls))
 
         # Check for collisions before moving
         new_rect = self.rect.move(dx, 0)
@@ -53,14 +54,14 @@ class Player:
         if not collision_x:
             self.rect.x = new_rect.x
         else:
-            print(f"Player blocked in X direction at {self.rect.topleft}")
+            logger.debug("Player blocked in X direction at %s", self.rect.topleft)
 
         new_rect = self.rect.move(0, dy)
         collision_y = any(new_rect.colliderect(wall.rect) for wall in walls)
         if not collision_y:
             self.rect.y = new_rect.y
         else:
-            print(f"Player blocked in Y direction at {self.rect.topleft}")
+            logger.debug("Player blocked in Y direction at %s", self.rect.topleft)
 
     def shoot(self):
         """
@@ -75,7 +76,7 @@ class Player:
             spawn_y = self.rect.centery + fy * (self.rect.height // 2 + 2)
             bullet = Bullet(spawn_x, spawn_y, self.facing)
             self.bullets.append(bullet)
-            print(f"Player fired a bullet at {self.rect.topleft}. Total bullets: {len(self.bullets)}")
+            logger.info("Player fired a bullet at %s. Total bullets: %s", self.rect.topleft, len(self.bullets))
             self.shoot_cooldown = 20  # Cooldown in frames
 
     def update(self, walls):
@@ -98,7 +99,7 @@ class Player:
             
             is_off = bullet.is_off_screen()
             if should_remove_bullet or is_off:
-                print(f"Player bullet at {bullet.rect.topleft} removed. Collision: {should_remove_bullet}, Off-screen: {is_off}")
+                logger.debug("Player bullet at %s removed. Collision: %s, Off-screen: %s", bullet.rect.topleft, should_remove_bullet, is_off)
                 self.bullets.remove(bullet)
         
         # Remove destroyed walls

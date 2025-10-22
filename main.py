@@ -6,6 +6,8 @@ main.py: Entry point for the game. Initializes and starts the game.
 # running the file directly (python training_game\main.py).
 import sys
 from pathlib import Path
+import logging
+import os
 
 # Try to import the package normally. If that fails (for example when the
 # script is executed directly as `python training_game\main.py`), add the
@@ -21,5 +23,8 @@ except ModuleNotFoundError:
 
 
 if __name__ == "__main__":
+    # Configure logging: default WARNING. Set TRAINING_GAME_DEBUG=1 to enable DEBUG.
+    log_level = logging.DEBUG if os.getenv('TRAINING_GAME_DEBUG') in ('1', 'true', 'True') else logging.WARNING
+    logging.basicConfig(level=log_level, format='%(asctime)s %(levelname)s [%(name)s] %(message)s')
     game = Game()
     game.run()

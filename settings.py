@@ -22,6 +22,11 @@ PLAYER_SPEED = 5
 BULLET_SPEED = 10
 ENEMY_SPEED = 2
 
+# Level system
+LEVELS = ["level1", "level2", "level3"]
+LEVEL_TRANSITION_TIME = 2.0  # seconds
+ENEMY_BASE_SPEED = ENEMY_SPEED
+
 # Game settings
 FPS = 60
 ENEMY_COUNT = 5
